@@ -15,41 +15,44 @@ const diffColors = {
   neg: "#e41a1c",
   pos: "#4daf4a",
 };
+
 const changesOptions = [
   { value: "pct", label: "percentage" },
   { value: "usd", label: "dollars" },
 ];
 
 function App() {
-  const [state, setState] = useState({
-    changeType: "pct",
-    usePct: true,
-    budgetChoices: [],
-    budget1: 0,
-    budget2: 0,
-    totals: [],
-  });
-  // const [totals, setTotals] = useState([]);
+
+  const [budgets, setBudgets] = useState([]);
+
   const [budget1Choice, setBudget1Choice] = useState({
-    value: 0,
+    value: "FY18",
     label: "FY18 Adopted",
   });
   const [budget2Choice, setBudget2Choice] = useState({
-    value: 1,
+    value: "FY17",
     label: "FY17 Adopted",
   });
   const [changeType, setChangeType] = useState({
     value: "pct",
     label: "percentage",
   });
+  const [selectOptions, setSelectOptions] = useState([]);
 
-  const budget1Options = state.budgetChoices.filter(
-    (option) => option != budget2Choice
+
+
+  const budget1Options = selectOptions.filter(
+    (option) => option.value !== budget2Choice.value
   );
-  const budget2Options = state.budgetChoices.filter(
-    (option) => option != budget1Choice
+
+  const budget2Options = selectOptions.filter(
+    (option) => option.value !== budget1Choice.value
   );
-  const selectedYears = [state.budget1, state.budget2];
+
+  const selectedYears = budgets.filter(
+    (budget) =>
+      budget.year === budget1Choice.value || budget.year === budget2Choice.value
+  );
 
   const totals = selectedYears.map((record) => {
     if (record) {
@@ -59,28 +62,24 @@ function App() {
       };
     }
   });
-  const onChangeBudget1 = (e) => {
-    setBudget1Choice(e);
-  };
-  const onChangeBudget2 = (e) => {
-    setBudget2Choice(e);
-  };
+
   useEffect(() => {
     fetchTotals()
       .then((data) => {
-        const budgetChoices = data.map(getBudgetOption);
-        const defaultChoices = getBudgetDefaults(budgetChoices);
-        setBudget1Choice(defaultChoices[0]);
-        setBudget2Choice(defaultChoices[1]);
-        setState({
-          ...state,
-          budgetChoices: budgetChoices,
-          budget1: data[defaultChoices[0].value],
-          budget2: data[defaultChoices[1].value],
-          totals: data,
+        const selectOptions = data.map((option) => {
+          return {
+            value: option.fiscal_year_range,
+            label: `${option.fiscal_year_range} Adopted`,
+          };
         });
-        setBudget1Choice(defaultChoices[0]);
-        setBudget2Choice(defaultChoices[1]);
+        setSelectOptions(selectOptions);
+        const budgets = data.map((option) => {
+          return {
+            total: option.total,
+            year: option.fiscal_year_range,
+          };
+        });
+        setBudgets(budgets);
       })
       .catch((err) => console.log(err));
   }, [fetchTotals]);
@@ -104,7 +103,6 @@ function App() {
       border: "none",
     }),
   };
-  console.log("state totals", state.totals);
   return (
     <div className="mx-auto max-w-[1280px] p-6">
       <div className="flex flex-col gap-5 sm:flex-row md:items-center">
@@ -113,7 +111,7 @@ function App() {
           <Select
             options={budget1Options}
             value={budget1Choice}
-            onChange={onChangeBudget1}
+            onChange={setBudget1Choice}
             searchable={false}
             clearable={false}
             styles={customStyles1}
@@ -124,7 +122,7 @@ function App() {
           <Select
             options={budget2Options}
             value={budget2Choice}
-            onChange={onChangeBudget2}
+            onChange={setBudget2Choice}
             searchable={false}
             clearable={false}
             styles={customStyles2}
