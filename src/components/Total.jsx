@@ -46,13 +46,18 @@ export const options = {
       },
     },
   },
-  // responsive: true,
-  // legend: {
-  //   display: false,
-  // },
+  maintainAspectRatio: false,
   plugins: {
     legend: {
       display: false,
+    },
+  },
+  layout: {
+    padding: {
+      left: 0,
+      top: 0,
+      right: 0,
+      bottom: 0,
     },
   },
 };
@@ -71,9 +76,8 @@ const Total = ({ barData, colors, diffColors, usePct, test }) => {
         data: [entry.total],
         label: entry.key,
         backgroundColor: colors[i],
-        // maxBarThickness: 30,
-        barPercentage: 1,
-        categoryPercentage: 0.4,
+        barPercentage: 0.8,
+        categoryPercentage: 1,
       };
     }),
   };
@@ -88,7 +92,9 @@ const Total = ({ barData, colors, diffColors, usePct, test }) => {
           usePct={usePct}
         ></DiffStyled>
       </h2>
-      <Bar data={data} options={options} />
+      <div className="h-[100px] w-full">
+        <Bar data={data} options={options} />
+      </div>
     </div>
   );
 };

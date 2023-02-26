@@ -27,10 +27,17 @@ function App() {
     budgetChoices: [],
     budget1: 0,
     budget2: 0,
+    totals: [],
   });
   // const [totals, setTotals] = useState([]);
-  const [budget1Choice, setBudget1Choice] = useState(null);
-  const [budget2Choice, setBudget2Choice] = useState(null);
+  const [budget1Choice, setBudget1Choice] = useState({
+    value: 0,
+    label: "FY18 Adopted",
+  });
+  const [budget2Choice, setBudget2Choice] = useState({
+    value: 1,
+    label: "FY17 Adopted",
+  });
   const [changeType, setChangeType] = useState({
     value: "pct",
     label: "percentage",
@@ -42,8 +49,8 @@ function App() {
   const budget2Options = state.budgetChoices.filter(
     (option) => option != budget1Choice
   );
-
   const selectedYears = [state.budget1, state.budget2];
+
   const totals = selectedYears.map((record) => {
     if (record) {
       return {
@@ -52,7 +59,12 @@ function App() {
       };
     }
   });
-
+  const onChangeBudget1 = (e) => {
+    setBudget1Choice(e);
+  };
+  const onChangeBudget2 = (e) => {
+    setBudget2Choice(e);
+  };
   useEffect(() => {
     fetchTotals()
       .then((data) => {
@@ -65,7 +77,10 @@ function App() {
           budgetChoices: budgetChoices,
           budget1: data[defaultChoices[0].value],
           budget2: data[defaultChoices[1].value],
+          totals: data,
         });
+        setBudget1Choice(defaultChoices[0]);
+        setBudget2Choice(defaultChoices[1]);
       })
       .catch((err) => console.log(err));
   }, [fetchTotals]);
@@ -89,7 +104,7 @@ function App() {
       border: "none",
     }),
   };
-
+  console.log("state totals", state.totals);
   return (
     <div className="mx-auto max-w-[1280px] p-6">
       <div className="flex flex-col gap-5 sm:flex-row md:items-center">
@@ -98,7 +113,7 @@ function App() {
           <Select
             options={budget1Options}
             value={budget1Choice}
-            onChange={setBudget1Choice}
+            onChange={onChangeBudget1}
             searchable={false}
             clearable={false}
             styles={customStyles1}
@@ -109,7 +124,7 @@ function App() {
           <Select
             options={budget2Options}
             value={budget2Choice}
-            onChange={setBudget2Choice}
+            onChange={onChangeBudget2}
             searchable={false}
             clearable={false}
             styles={customStyles2}
