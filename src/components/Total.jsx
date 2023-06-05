@@ -61,8 +61,8 @@ export const options = {
     },
   },
 };
-const Total = ({ barData, colors, diffColors, usePct, test }) => {
-  if (barData.length === 0 || barData.some((record) => !record)) {
+const Total = ({ barData, colors, diffColors, usePct }) => {
+  if (barData.length === 0 || !Object.keys(barData[0]).length) {
     return <div>Loading...</div>;
   }
   let diff = barData[0].total - barData[1].total;
@@ -74,7 +74,7 @@ const Total = ({ barData, colors, diffColors, usePct, test }) => {
     datasets: barData.map((entry, i) => {
       return {
         data: [entry.total],
-        label: entry.key,
+        label: entry.year,
         backgroundColor: colors[i],
         barPercentage: 0.8,
         categoryPercentage: 1,

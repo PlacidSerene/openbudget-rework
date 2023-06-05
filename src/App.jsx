@@ -1,5 +1,12 @@
 import { useState, useEffect } from "react";
-import { Nav, NavItem, Tab } from "react-bootstrap";
+import {
+  Nav,
+  NavItem,
+  TabContent,
+  TabContainer,
+  TabPane,
+} from "react-bootstrap";
+import "bootstrap/dist/css/bootstrap.min.css";
 import { schemeSet2 as colors } from "d3-scale-chromatic";
 import Select from "react-select";
 import { fetchTotals } from "./api/fetchTotals";
@@ -9,7 +16,8 @@ import Total from "./components/Total";
 import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
-
+import { set } from "d3-collection";
+import Breakdown from "./components/Breakdown";
 const styles = [{ color: colors[0] }, { color: colors[1] }];
 const diffColors = {
   neg: "#e41a1c",
@@ -22,24 +30,14 @@ const changesOptions = [
 ];
 
 function App() {
-
   const [budgets, setBudgets] = useState([]);
-
-  const [budget1Choice, setBudget1Choice] = useState({
-    value: "FY18",
-    label: "FY18 Adopted",
-  });
-  const [budget2Choice, setBudget2Choice] = useState({
-    value: "FY17",
-    label: "FY17 Adopted",
-  });
+  const [budget1Choice, setBudget1Choice] = useState({});
+  const [budget2Choice, setBudget2Choice] = useState({});
   const [changeType, setChangeType] = useState({
     value: "pct",
     label: "percentage",
   });
   const [selectOptions, setSelectOptions] = useState([]);
-
-
 
   const budget1Options = selectOptions.filter(
     (option) => option.value !== budget2Choice.value
@@ -49,19 +47,7 @@ function App() {
     (option) => option.value !== budget1Choice.value
   );
 
-  const selectedYears = budgets.filter(
-    (budget) =>
-      budget.year === budget1Choice.value || budget.year === budget2Choice.value
-  );
-
-  const totals = selectedYears.map((record) => {
-    if (record) {
-      return {
-        key: record.fiscal_year_range,
-        total: record.total,
-      };
-    }
-  });
+  const selectedYears = [budget1Choice, budget2Choice];
 
   useEffect(() => {
     fetchTotals()
@@ -70,8 +56,23 @@ function App() {
           return {
             value: option.fiscal_year_range,
             label: `${option.fiscal_year_range} Adopted`,
+            total: option.total,
           };
         });
+
+        //default budget 1 and 2
+        const defaultBudget1Choice = {
+          value: data[0].fiscal_year_range,
+          label: `${data[0].fiscal_year_range} Adopted`,
+          total: data[0].total,
+        };
+        const defaultBudget2Choice = {
+          value: data[1].fiscal_year_range,
+          label: `${data[1].fiscal_year_range} Adopted`,
+          total: data[1].total,
+        };
+        setBudget1Choice(defaultBudget1Choice);
+        setBudget2Choice(defaultBudget2Choice);
         setSelectOptions(selectOptions);
         const budgets = data.map((option) => {
           return {
@@ -103,6 +104,7 @@ function App() {
       border: "none",
     }),
   };
+
   return (
     <div className="mx-auto max-w-[1280px] p-6">
       <div className="flex flex-col gap-5 sm:flex-row md:items-center">
@@ -128,21 +130,6 @@ function App() {
             styles={customStyles2}
           />
         </div>
-
-        {/* <div className="">
-          <div className="form-group">
-            <label>Show changes as:</label>
-            <select
-              className="form-control"
-              id="sortControl"
-              value={state.changeType}
-              onChange={updateChangeType}
-            >
-              <option value="pct">percentage</option>
-              <option value="usd">dollars</option>
-            </select>
-          </div>
-        </div> */}
         <div>
           <Select
             options={changesOptions}
@@ -156,77 +143,71 @@ function App() {
 
       <div className="mt-5">
         <Total
-          barData={totals}
+          barData={selectedYears}
           colors={colors}
           diffColors={diffColors}
           usePct={changeType.value === "pct"}
         ></Total>
         <h2>Budget breakdowns</h2>
         <p>Get more detail on where money came from and how it was spent.</p>
-
-        <div className="flex">
-          <div>Hello</div>
-          <div>Hello</div>
-          <div>Hello</div>
-        </div>
       </div>
 
-      {/* <Tab.Container id="selectBreakdown" defaultActiveKey="spendDept">
+      <TabContainer id="selectBreakdown" defaultActiveKey="spendDept">
         <div className="row">
           <div className="col-sm-3">
             <Nav bsStyle="pills" stacked>
-              <NavItem eventKey="spendDept">Spending by Department</NavItem>
-              <NavItem eventKey="spendCat">Spending by Category</NavItem>
-              <NavItem eventKey="revDept">Revenue by Department</NavItem>
-              <NavItem eventKey="revCat">Revenue by Category</NavItem>
+              <Nav.Item eventKey="spendDept">Spending by Department</Nav.Item>
+              <Nav.Item eventKey="spendCat">Spending by Category</Nav.Item>
+              <Nav.Item eventKey="revDept">Revenue by Department</Nav.Item>
+              <Nav.Item eventKey="revCat">Revenue by Category</Nav.Item>
             </Nav>
           </div>
           <div className="col-sm-9">
-            <Tab.Content mountOnEnter>
-              <Tab.Pane eventKey="spendDept">
-                <Breakdown
+            <TabContent mountOnEnter>
+              <TabPane eventKey="spendDept">
+                {/* <Breakdown
                   colors={colors}
                   diffColors={diffColors}
                   usePct={usePct}
                   years={selectedYears}
                   type="spending"
                   dimension="department"
-                ></Breakdown>
-              </Tab.Pane>
-              <Tab.Pane eventKey="spendCat">
-                <Breakdown
+                ></Breakdown> */}
+              </TabPane>
+              <TabPane eventKey="spendCat">
+                {/* <Breakdown
                   colors={colors}
                   diffColors={diffColors}
                   usePct={usePct}
                   years={selectedYears}
                   type="spending"
                   dimension="category"
-                ></Breakdown>
-              </Tab.Pane>
-              <Tab.Pane eventKey="revDept">
-                <Breakdown
+                ></Breakdown> */}
+              </TabPane>
+              <TabPane eventKey="revDept">
+                {/* <Breakdown
                   colors={colors}
                   diffColors={diffColors}
                   usePct={usePct}
                   years={selectedYears}
                   type="revenue"
                   dimension="department"
-                ></Breakdown>
-              </Tab.Pane>
-              <Tab.Pane eventKey="revCat">
-                <Breakdown
+                ></Breakdown> */}
+              </TabPane>
+              <TabPane eventKey="revCat">
+                {/* <Breakdown
                   colors={colors}
                   diffColors={diffColors}
                   usePct={usePct}
                   years={selectedYears}
                   type="revenue"
                   dimension="category"
-                ></Breakdown>
-              </Tab.Pane>
-            </Tab.Content>
+                ></Breakdown> */}
+              </TabPane>
+            </TabContent>
           </div>
         </div>
-      </Tab.Container> */}
+      </TabContainer>
     </div>
   );
 }

@@ -2,7 +2,7 @@ import React from "react";
 import { Bar } from "react-chartjs-2";
 import { keys, set } from "d3-collection";
 
-import { asTick } from "./utils.jsx";
+import { asTick } from "../utils/utils";
 
 const chartOpts = {
   legend: {
@@ -42,6 +42,26 @@ const chartOpts = {
       },
     },
   },
+};
+
+const Trend2 = ({ data }) => {
+  const allKeys = set();
+  keys(data[0]).forEach((key) => {
+    allKeys.add(key);
+  });
+  keys(data[1]).forEach((key) => {
+    allKeys.add(key);
+  });
+  const labels = allKeys.values().sort();
+  const datasets = data.map((record, i) => {
+    return {
+      label: years[i].fiscal_year_range,
+      data: labels.map((label) => record[label]),
+      backgroundColor: colors[i],
+    };
+  });
+  const data = { labels, datasets };
+  return <Bar data={data} options={chartOpts} height={125}></Bar>;
 };
 
 export default class Trend extends React.Component {
